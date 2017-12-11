@@ -26,11 +26,16 @@ use dosamigos\switchinput\SwitchBox;
         </div>
 
         <div class="col-md-4">
-            <?php // $form->field($model, 'organisation_type')->textInput(['maxlength' => true])?>
             <?= $form->field($model, 'organisation_type')->dropDownList(\app\models\FormDigitalSignature::selectableChoices('organisation_type')) ?>
         </div>
         <div class="col-md-5">
-            <?= $form->field($model, 'organisation')->textInput(['maxlength' => true]) ?>
+            <?php
+            $with_subm = \app\models\FormDigitalSignature::selectableChoices('organisation');
+            $core_data = \app\models\FormDigitalSignature::selectables();
+            $organisations = array_merge($with_subm, $core_data);
+
+            ?>
+            <?= $form->field($model, 'organisation')->dropDownList($organisations, ['prompt' => 'Επιλέξτε...']) ?>
         </div>
     </div>
 

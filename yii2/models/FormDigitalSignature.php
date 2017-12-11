@@ -1,6 +1,7 @@
 <?php
 namespace app\models;
 
+use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
@@ -30,11 +31,13 @@ use yii\helpers\ArrayHelper;
  */
 class FormDigitalSignature extends \yii\db\ActiveRecord
 {
+
     const SCENARIO_SELECT_ORGANISATION = 'SCENARIO_SELECT_ORGANISATION';
 
     public $period_in;
     public $updated_at_str;
     public $created_at_str;
+    public $joint_organisation_type, $joint_organisation; // used for exports
 
     /**
      * @inheritdoc
@@ -53,18 +56,23 @@ class FormDigitalSignature extends \yii\db\ActiveRecord
             [['organisation'], 'required', 'on' => [self::SCENARIO_DEFAULT, self::SCENARIO_SELECT_ORGANISATION]],
             [['period_in'], 'date', 'format' => 'php:m-Y', 'timestampAttribute' => 'period'],
             [['period'], 'filter', 'filter' => function ($value) {
-//                    return date('Y-m-d', $value); // strtotime("01-{$value}"));
-                return date('Y-m-d', strtotime('first day of this month', $value));
-            }
+                    return date('Y-m-d', strtotime('first day of this month', $value));
+                }
             ],
             [['period_in', 'period', 'published', 'employees_sign', 'employees_sign_digital', 'employees_trained', 'procedures_digital', 'organisation_type', 'organisation', 'fullname', 'email', 'substitute_fullname', 'substitute_email', 'training_action', 'phone', 'substitute_phone'], 'required', 'except' => [self::SCENARIO_SELECT_ORGANISATION]],
             [['period', 'organisation'], 'unique', 'targetAttribute' => ['period', 'organisation'], 'message' => 'Έχουν ήδη καταχωρηθεί στοιχεία για την περίοδο'],
             [['published', 'employees_sign', 'employees_sign_digital', 'employees_trained', 'procedures_digital', 'created_at', 'updated_at'], 'integer'],
             [['organisation_type', 'organisation', 'fullname', 'email', 'substitute_fullname', 'substitute_email', 'training_action'], 'string', 'max' => 200],
+            [['organisation_type'], 'in', 'range' => \app\models\FormDigitalSignature::selectableChoices('organisation_type')],
+            [['training_action'], 'in', 'range' => \app\models\FormDigitalSignature::selectableChoices('training_action')],
             [['email', 'substitute_email'], 'email'],
             [['phone', 'substitute_phone'], 'string', 'max' => 10],
             [['phone', 'substitute_phone'], 'match', 'pattern' => '/^[62][0-9]{9}$/'],
             [['training_action_other', 'procedures_titles'], 'string', 'max' => 2000],
+            [['training_action_other'], 'required', 'when' => function ($model, $attribute) {
+                    return $model->training_action == 'ΑΛΛΟ';
+                }, 'whenClient' => "function (attribute, value) { return \$('#formdigitalsignature-training_action').val() === 'ΑΛΛΟ'; }"
+            ],
         ];
     }
 
@@ -89,7 +97,9 @@ class FormDigitalSignature extends \yii\db\ActiveRecord
         return [
             'id' => 'Κωδικός',
             'organisation_type' => 'Κατηγορία φορέα',
+            'joint_organisation_type' => 'Κατηγορία φορέα',
             'organisation' => 'Φορέας',
+            'joint_organisation' => 'Φορέας',
             'period' => 'Μήνας αναφοράς',
             'period_in' => 'Μήνας αναφοράς',
             'fullname' => 'Ονοματεπώνυμο υπεύθυνου',
@@ -144,6 +154,9 @@ class FormDigitalSignature extends \yii\db\ActiveRecord
 
     public function afterFind()
     {
+        $this->joint_organisation_type = Yii::$app->params[\app\models\FormDigitalSignature::class]['joint_organisation_type'];
+        $this->joint_organisation= Yii::$app->params[\app\models\FormDigitalSignature::class]['joint_organisation'];
+
         $this->period_in = date("m-Y", strtotime($this->period));
         $this->created_at_str = date("d/m/Y H:i:s", $this->created_at);
         $this->updated_at_str = date("d/m/Y H:i:s", $this->updated_at);

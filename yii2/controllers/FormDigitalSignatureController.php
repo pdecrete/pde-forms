@@ -59,7 +59,8 @@ class FormDigitalSignatureController extends Controller
         $model = new FormDigitalSignature();
 
         if ($organisation === '') {
-            return $this->render('has-previous-submit');
+//            return $this->render('has-previous-submit');
+            return $this->redirect(['select-organisation']);
         }
 
         $last_submission_model = FormDigitalSignature::find()
@@ -129,8 +130,9 @@ class FormDigitalSignatureController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->post());
 
         $export_attributes = [
-            'organisation_type',
             'organisation',
+            'joint_organisation_type',
+            'joint_organisation',
 //            'period',
             'created_at_str',
             'period_in',

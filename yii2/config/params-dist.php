@@ -24,5 +24,9 @@ return [
     'forms' => [
         'Any...', 
         'of classname for model handled forms'
+    ],
+    \app\models\FormDigitalSignature::class => [
+        'joint_organisation_type' => 'ΥΠΟΥΡΓΕΙΑ',
+        'joint_organisation' => 'ΥΠΟΥΡΓΕΙΟ ΠΑΙΔΕΙΑΣ, ΕΡΕΥΝΑΣ ΚΑΙ ΘΡΗΣΚΕΥΜΑΤΩΝ',
     ]
 ];
