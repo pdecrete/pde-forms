@@ -3,6 +3,7 @@
 return [
     'companyName' => 'Η υπηρεσία μου',
     'adminEmail' => 'admin@example.com',
+    'tracking-id' => 'your-tracking-id', // comment this line if no google tracking is used
     'users' => [
         '-1' => [
             'id' => '-1',
